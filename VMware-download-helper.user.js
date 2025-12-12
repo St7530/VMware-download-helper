@@ -18,7 +18,7 @@
     const originalSend = originalXHR.prototype.send;
 
     // 深度删除工具函数
-    function deepRemoveKey(obj, targetKey) {
+    function deepRemoveKey(obj, targetKey, newValue) {
         const paths = [];
         function traverse(o, path = []) {
             if (Array.isArray(o)) {
@@ -29,7 +29,8 @@
                 Object.entries(o).forEach(([key, value]) => {
                     const currentPath = [...path, key];
                     if (key === targetKey) {
-                        delete o[key];
+                        // delete o[key];
+                        o[key] = newValue;
                         paths.push(currentPath.join('.'));
                     }
                     traverse(value, currentPath);
@@ -59,7 +60,7 @@
                     console.log('%c原始响应内容', 'color: #4285f4; font-weight: bold', JSON.parse(JSON.stringify(originalResponse)));
 
                     // 深度删除操作
-                    const deletedPaths = deepRemoveKey(originalResponse, 'exportControlStatus');
+                    const deletedPaths = deepRemoveKey(originalResponse, 'exportControlStatus', 'SCREENING_NOT_REQUIRED');
 
                     if (deletedPaths.length > 0) {
                         Object.defineProperty(xhr, 'responseText', {
@@ -67,7 +68,7 @@
                             writable: false
                         });
 
-                        console.log('%c已删除以下字段：', 'color: #0f9d58; font-weight: bold', {
+                        console.log('%c已替换以下字段：', 'color: #0f9d58; font-weight: bold', {
                             count: deletedPaths.length,
                             paths: deletedPaths,
                             modifiedResponse: JSON.parse(JSON.stringify(originalResponse))
